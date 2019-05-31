@@ -4402,7 +4402,14 @@ public class RubyModule extends RubyObject {
         do {
             Object value;
             if ((value = module.constantTableFetch(name)) != null) {
-                if (value != null) return true;
+                if (value == UNDEF) {
+                    Autoload autoload = getAutoloadMap().get(name);
+                    if (autoload == null) continue;
+                    if (autoload.ctx == getRuntime().getCurrentContext()) continue;
+                    return false;
+                }
+
+                return true;
             }
 
         } while (isObject && (module = module.getSuperClass()) != null );
